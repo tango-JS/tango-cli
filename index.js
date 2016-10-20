@@ -20,6 +20,8 @@ var exec = require('child_process').exec;
 var pkg = require('./package.json');
 var download = require('download-git-repo');
 var path = require('path');
+var ncp = require('ncp').ncp;
+var replace = require("replace");
 
 clear();
 console.log(
@@ -31,8 +33,62 @@ console.log(
   )
 );
 
+let capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
-let init = (directory, options) => {
+let generate = (type, name) => {
+
+  switch (type) {
+    case 'module':
+      console.log(chalk.cyan('Generating ' + name + ' module.'));
+
+      ncp(files.workingPath() + '/blueprints/angular/module', name, function(err) {
+        if (err) {
+          return console.error(err);
+        }
+        //rename files
+        replace({
+          regex: "<%= moduleNameLC %>",
+          replacement: name,
+          paths: ['./'+name],
+          recursive: true,
+          silent: true,
+        });
+        replace({
+          regex: "<%= moduleNameUC %>",
+          replacement: capitalizeFirstLetter(name),
+          paths: ['./'+name],
+          recursive: true,
+          silent: true,
+        });
+        //rename variable in files with ._template
+        console.log(chalk.green(name + ' module generated.'));
+      });
+      break;
+    case 'component':
+      console.log(chalk.cyan('Generating component.'));
+      break;
+    case 'service':
+      console.log(chalk.cyan('Generating service.'));
+      break;
+    case 'filter':
+      console.log(chalk.cyan('Generating filter.'));
+      break;
+    default:
+      console.log(chalk.red('Error: ' + type + ' generator not supported.'));
+  }
+
+
+
+
+  // run in cmd line
+  // exec(parameterizedCommand,output);
+
+};
+
+
+let init = () => {
   var questions = [{
     type: 'input',
     name: 'name',
@@ -50,7 +106,6 @@ let init = (directory, options) => {
     .prompt(questions)
     .then(function(answers) {
       if (answers.type == 'angular') {
-
         var status = new Spinner('Downloading seed from: https://github.com/cogoo/angularStarter...');
         status.start();
         if (files.directoryExists(answers.name)) {
@@ -99,6 +154,13 @@ program
   .version(pkg.version)
   .command('init')
   .action(init);
+
+program
+  .version(pkg.version)
+  .command('generate <type> <name>')
+  .alias('g')
+  .action(generate);
+
 
 program.parse(process.argv);
 

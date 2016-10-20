@@ -33,8 +33,11 @@
     "inquirer": "^1.2.2",
     "lodash": "^4.16.4",
     "minimist": "^1.2.0",
+    "ncp": "^2.0.0",
     "path": "^0.12.7",
     "preferences": "^0.2.1",
+    "rename": "^1.0.3",
+    "replace": "^0.3.0",
     "simple-git": "^1.54.0",
     "touch": "^1.0.0"
   }
